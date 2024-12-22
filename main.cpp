@@ -7,20 +7,33 @@
 #include "Shader.h"
 
 #include "stb_image.h"
+#include "glfw/deps/linmath.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float hrzViewDegrees = 0.0;
-float vrtViewDegrees = 0.0;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float fov = 45.0f;
+const float cameraSpeed = 20.f; // adjust accordingly
+const float mouseSensitivity = 0.2f;
+const float zoomSensitivity = 10.0f;
+const float zoomLerpSpeed = 8.0f;
+
+float deltaTime = 0.0f;
+float targetFov = 45.0f;
 
 unsigned int generateTexture(const char* filePath, unsigned int rgb_type)
 {
@@ -70,6 +83,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -79,8 +94,10 @@ int main()
         return -1;
     }
 
-    Shader shader("../vertex.glsl", "../fragment.glsl");
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    Shader shader("../vertex.glsl", "../fragment.glsl");
+    static float lastTime = 0.f;
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
@@ -190,15 +207,23 @@ int main()
         // drawing
         shader.use();
 
-        glm::mat4 view = glm::mat4(1.0f);
+        // camera setup
+        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
         // note that we're translating the scene in the reverse direction of where we want to move
 
-        view = glm::rotate(view, glm::radians(vrtViewDegrees), glm::vec3(-1.0f, 0.0f, 0.0f));
-        view = glm::rotate(view, glm::radians(hrzViewDegrees), glm::vec3(0.0f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(-2.0f, 0.0f, -3.0f));
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
 
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
@@ -225,6 +250,18 @@ int main()
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        deltaTime = glfwGetTime() - lastTime;
+        lastTime = glfwGetTime();
+
+        if(!glm::epsilonEqual(fov, targetFov, glm::epsilon<float>()))
+        {
+            fov = glm::mix(fov, targetFov, zoomLerpSpeed * deltaTime);
+            if (fov < 1.0f)
+                fov = 1.0f;
+            if (fov > 45.0f)
+                fov = 45.0f;
+        }
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
@@ -243,22 +280,53 @@ void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+
+    glm::vec3 camDirection = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camDirection += cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camDirection -= cameraFront ;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camDirection -= glm::normalize(glm::cross(cameraFront, cameraUp));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camDirection += glm::normalize(glm::cross(cameraFront, cameraUp));
+
+    if(camDirection != glm::vec3(0.0f, 0.0f, 0.0f))
     {
-        hrzViewDegrees += 0.01f;
+        camDirection = glm::normalize(camDirection);
+        cameraPos += camDirection * cameraSpeed * deltaTime;
     }
-    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    {
-        hrzViewDegrees -= 0.01f;
-    }
-    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        vrtViewDegrees += 0.01f;
-    }
-    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        vrtViewDegrees -= 0.01f;
-    }
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    static glm::vec2 lastMousePos = glm::vec2(xpos, ypos);
+    static float yaw = -90.0f;
+    static float pitch = 0.0f;
+
+    glm::vec2 offset = glm::vec2(xpos - lastMousePos.x, -ypos + lastMousePos.y);
+    lastMousePos = glm::vec2(xpos, ypos);
+    offset *= mouseSensitivity;
+
+    yaw   += offset.x;
+    pitch += offset.y;
+
+    if(pitch > 89.0f)
+        pitch =  89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 camDirection;
+    camDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    camDirection.y = sin(glm::radians(pitch));
+    camDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(camDirection);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    targetFov = fov - (float)yoffset * zoomSensitivity;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
