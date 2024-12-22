@@ -58,11 +58,11 @@ void Camera::processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camDirection += front;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camDirection -= front ;
+        camDirection -= front;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camDirection -= glm::normalize(glm::cross(front, up));
+        camDirection -= right;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camDirection += glm::normalize(glm::cross(front, up));
+        camDirection += right;
 
     if(camDirection != glm::vec3(0.0f, 0.0f, 0.0f))
     {
