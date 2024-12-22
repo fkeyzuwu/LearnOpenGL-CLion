@@ -25,7 +25,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime = 0.0f;
 
-Camera camera;
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 unsigned int generateTexture(const char* filePath, unsigned int rgb_type)
 {
