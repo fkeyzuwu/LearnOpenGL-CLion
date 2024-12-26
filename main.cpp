@@ -194,6 +194,8 @@ int main()
 
         camera.update(window, deltaTime);
 
+        lightPos.x = 2 + 2 * sin(glfwGetTime() * 3);
+
         glm::mat4 view = camera.getViewMatrix();
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.fov), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
