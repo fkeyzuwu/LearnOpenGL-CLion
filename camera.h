@@ -37,5 +37,6 @@ public:
     void processInput(GLFWwindow *window);
     void mouse_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    glm::vec3 getPosition() { return position; }
 };
 

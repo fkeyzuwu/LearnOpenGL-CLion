@@ -93,6 +93,11 @@ void Shader::setVec3(const std::string& name, float x, float y, float z)
     glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 }
 
+void Shader::setVec3(const std::string& name, glm::vec3& vector)
+{
+    setVec3(name, vector.x, vector.y, vector.z);
+}
+
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
 {
     int  success;
