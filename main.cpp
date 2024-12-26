@@ -196,7 +196,7 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // drawing
+        // drawing cube
         lightingShader.use();
 
         camera.update(window, deltaTime);
@@ -216,12 +216,9 @@ int main()
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
-
+        // light cube shader
         lightCubeShader.use();
+        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
