@@ -174,6 +174,15 @@ int main()
     lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
     lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
+ch    lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    lightingShader.setFloat("material.shininess", 32.0f);
+
+    lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
     glEnable(GL_DEPTH_TEST);
 
     // render loop
@@ -195,6 +204,17 @@ int main()
         camera.update(window, deltaTime);
 
         lightPos.x = 2 + 2 * sin(glfwGetTime() * 3);
+
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+
+        glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+
+        lightingShader.setVec3("light.ambient", ambientColor);
+        lightingShader.setVec3("light.diffuse", diffuseColor);
 
         glm::mat4 view = camera.getViewMatrix();
         glm::mat4 projection = glm::mat4(1.0f);
@@ -223,6 +243,7 @@ int main()
         lightCubeShader.setMat4("model", model);
         lightCubeShader.setMat4("view", view);
         lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setVec3("color", lightColor);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
