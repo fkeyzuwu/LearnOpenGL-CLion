@@ -103,8 +103,8 @@ int main()
     stbi_set_flip_vertically_on_load(true);
 
     unsigned int diffuseMap = generateTexture("../container2.png");
-    unsigned int specularMap = generateTexture("../lighting_maps_specular_color.png");
-    unsigned int emissionMap = generateTexture("../matrix.jpg");
+    unsigned int specularMap = generateTexture("../container2_specular.png");
+    //unsigned int emissionMap = generateTexture("../matrix.jpg");
 
     Shader lightingShader("../lightingv.glsl", "../lightingf.glsl");
     Shader lightCubeShader("../light_cubev.glsl", "../light_cubef.glsl");
@@ -157,6 +157,19 @@ int main()
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -194,7 +207,7 @@ int main()
 
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
-    lightingShader.setInt("material.emission", 2);
+    //lightingShader.setInt("material.emission", 2);
 
     lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
     lightingShader.setFloat("material.shininess", 32.0f);
@@ -202,6 +215,10 @@ int main()
     lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
     lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // darken diffuse light a bit
     lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    lightingShader.setFloat("light.constant",  1.0f);
+    lightingShader.setFloat("light.linear",    0.09f);
+    lightingShader.setFloat("light.quadratic", 0.032f);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -239,9 +256,6 @@ int main()
         projection = glm::perspective(glm::radians(camera.fov), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
         lightingShader.setMat4("view", view);
         lightingShader.setMat4("projection", projection);
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.3, 1.0f));
-        lightingShader.setMat4("model", model);
 
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
@@ -250,15 +264,25 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         // bind emission map
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, emissionMap);
+        // glActiveTexture(GL_TEXTURE2);
+        // glBindTexture(GL_TEXTURE_2D, emissionMap);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for(unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // light cube shader
         lightCubeShader.use();
-        model = glm::mat4(1.0f);
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
