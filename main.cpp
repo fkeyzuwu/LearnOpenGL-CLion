@@ -247,10 +247,13 @@ int main()
 
         lightingShader.setVec3("light.ambient", ambientColor);
         lightingShader.setVec3("light.diffuse", diffuseColor);
-        lightingShader.setVec3("lightPos", lightPos);
 
-        glm::vec3 cameraPos = camera.getPosition();
-        lightingShader.setVec3("viewPos", cameraPos);
+        lightingShader.setVec3("light.position",  camera.position);
+        lightingShader.setVec3("light.direction", camera.front);
+        lightingShader.setFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
+
+        lightingShader.setVec3("viewPos", camera.position);
         glm::mat4 view = camera.getViewMatrix();
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.fov), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);

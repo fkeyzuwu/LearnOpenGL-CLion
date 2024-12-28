@@ -10,7 +10,10 @@ struct Material {
 in vec2 TexCoords;
 
 struct Light {
-    vec3 position;
+    vec3  position;
+    vec3  direction;
+    float cutOff;
+    float outerCutOff;
 
     vec3 ambient;
     vec3 diffuse;
@@ -29,7 +32,6 @@ uniform Light light;
 
 uniform vec3 objectColor;
 uniform vec3 lightColor;
-uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 in vec3 Normal;
@@ -37,11 +39,11 @@ in vec3 FragPos;
 
 void main()
 {
+    vec3 lightDir = normalize(light.position - FragPos);
+    vec3 norm = normalize(Normal);
+
     vec3 diffuseSample = vec3(texture(material.diffuse, TexCoords));
     vec3 ambient = light.ambient * diffuseSample;
-
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos);
 
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * diffuseSample;
@@ -55,6 +57,14 @@ void main()
 
     //vec3 emissionSample = texture(material.emission, TexCoords).rgb;
 
+    //spotlight (soft edges)
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+    diffuse *= intensity;
+    specular *= intensity;
+
+    //attenuation
     float distance    = length(light.position - FragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance +
     light.quadratic * (distance * distance));
@@ -63,11 +73,11 @@ void main()
     diffuse  *= attenuation;
     specular *= attenuation;
 
-    vec3 result = ambient + diffuse + specular;
-//    if(specSample == vec3(0))
-//    {
-//        result = emissionSample;
-//    }
+    //    if(specSample == vec3(0))
+    //    {
+    //        result += emissionSample;
+    //    }
 
+    vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0);
 }

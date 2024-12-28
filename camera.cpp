@@ -1,4 +1,5 @@
-#pragma once;
+#pragma once
+
 #include "camera.h"
 
 void Camera::updateCameraVectors()
