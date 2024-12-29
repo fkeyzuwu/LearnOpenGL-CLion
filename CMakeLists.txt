@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.13)
 project(LearnOpenGL-CLion)
 
 find_package(OpenGL REQUIRED)
@@ -11,6 +11,9 @@ include_directories(glfw/include)
 
 # Including GLAD
 include_directories(glad/include)
+
+# Including Assimp
+include_directories(assimp/include)
 
 set(SOURCE_FILES main.cpp glad/src/glad.c shader.h shader.cpp stb_image.h stb_image.cpp
         camera.cpp
