@@ -4,10 +4,10 @@
 
 #include <iostream>
 
-#include "camera.h"
-#include "Shader.h"
+#include "src/camera.h"
+#include "src/Shader.h"
 
-#include "stb_image.h"
+#include "stb_image/stb_image.h"
 #include "glfw/deps/linmath.h"
 
 #include "glm/glm.hpp"
@@ -68,12 +68,12 @@ int main()
 
     stbi_set_flip_vertically_on_load(true);
 
-    unsigned int diffuseMap = generateTexture("../container2.png");
-    unsigned int specularMap = generateTexture("../container2_specular.png");
+    unsigned int diffuseMap = generateTexture("../assets/container2.png");
+    unsigned int specularMap = generateTexture("../assets/container2_specular.png");
     //unsigned int emissionMap = generateTexture("../matrix.jpg");
 
-    Shader lightingShader("../lightingv.glsl", "../lightingf.glsl");
-    Shader lightCubeShader("../light_cubev.glsl", "../light_cubef.glsl");
+    Shader lightingShader("../src/shaders/lightingv.glsl", "../src/shaders/lightingf.glsl");
+    Shader lightCubeShader("../src/shaders/light_cubev.glsl", "../src/shaders/light_cubef.glsl");
 
     static float lastTime = 0.f;
     // set up vertex data (and buffer(s)) and configure vertex attributes

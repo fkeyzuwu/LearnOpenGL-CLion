@@ -11,13 +11,16 @@ include_directories(glfw/include)
 
 # Including GLAD
 include_directories(glad/include)
+include_directories(glad/src)
 
-# Including Assimp
-include_directories(assimp/include)
+# Including Assimp/glm
+include_directories(${CMAKE_SOURCE_DIR})
 
-set(SOURCE_FILES main.cpp glad/src/glad.c shader.h shader.cpp stb_image.h stb_image.cpp
-        camera.cpp
-        camera.h)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS src/*
+        main.cpp
+        glad/src/glad.c
+        stb_image/stb_image.cpp
+)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
