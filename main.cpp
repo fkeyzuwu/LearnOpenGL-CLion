@@ -14,6 +14,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "src/model.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -74,6 +76,8 @@ int main()
 
     Shader lightingShader("../src/shaders/lightingv.glsl", "../src/shaders/lightingf.glsl");
     Shader lightCubeShader("../src/shaders/light_cubev.glsl", "../src/shaders/light_cubef.glsl");
+
+    Model model("../assets/backpack_model/backpack.obj");
 
     static float lastTime = 0.f;
     // set up vertex data (and buffer(s)) and configure vertex attributes
