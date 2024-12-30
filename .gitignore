@@ -1,6 +1,3 @@
 .DS_Store
 .idea/
 cmake-build*
-
-/assimp/.cmake/
-/assimp
