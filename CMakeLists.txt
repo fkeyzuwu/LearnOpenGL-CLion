@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+
 project(LearnOpenGL-CLion)
 
 find_package(OpenGL REQUIRED)
@@ -25,4 +26,5 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS src/*
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
 # Linking GLFW and OGL
-target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+set(ASSIMP_LIBRARY "${CMAKE_SOURCE_DIR}/cmake-build-debug/libassimp-5.dll")
+target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARY} ${ASSIMP_LIBRARY})
