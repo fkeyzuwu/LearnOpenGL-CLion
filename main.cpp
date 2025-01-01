@@ -68,12 +68,7 @@ int main()
 
     stbi_set_flip_vertically_on_load(true);
 
-    unsigned int diffuseMap = generateTexture("../assets/container2.png");
-    unsigned int specularMap = generateTexture("../assets/container2_specular.png");
-    //unsigned int emissionMap = generateTexture("../matrix.jpg");
-
     Shader shader("../src/shaders/model_loadingvs.glsl", "../src/shaders/model_loadingfs.glsl");
-
     Model model("../assets/backpack_model/backpack.obj");
 
     static float lastTime = 0.f;
