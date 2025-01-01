@@ -29,7 +29,7 @@ float deltaTime = 0.0f;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-void setupLightingStaticUniforms(Shader& lightingShader, glm::vec3 lightPositions[]);
+void setupLightingStaticUniforms(Shader& lightingShader);
 unsigned int generateTexture(const char* filePath);
 
 int main()
@@ -106,6 +106,9 @@ int main()
         model_mat = glm::translate(model_mat, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model_mat = glm::scale(model_mat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
         shader.setMat4("model", model_mat);
+
+        setupLightingStaticUniforms(shader);
+
         model.Draw(shader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -150,45 +153,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void setupLightingStaticUniforms(Shader& shader, glm::vec3 pointLightPositions[])
+void setupLightingStaticUniforms(Shader& shader)
 {
     glm::vec3 ambient = glm::vec3(0.05f);
     glm::vec3 diffuse = glm::vec3(0.8);
     glm::vec3 specular = glm::vec3(1.0f);
 
     shader.use();
-
-    shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-
-    //material
-    shader.setInt("material.diffuse", 0);
-    shader.setInt("material.specular", 1);
-
-    shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    shader.setFloat("material.shininess", 32.0f);
-
-    // directional light
-    shader.setVec3("dirLight.ambient", ambient);
-    shader.setVec3("dirLight.diffuse", 0.4, 0.4, 0.4);
-    shader.setVec3("dirLight.specular", specular);
-    shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-
-    // point lights
-    for (int i = 0; i < 4; ++i)
-    {
-        std::string pluniform = "pointLights["+std::to_string(i)+"].";
-
-        shader.setVec3(pluniform + "ambient", ambient);
-        shader.setVec3(pluniform + "diffuse",  diffuse); // darken diffuse spotLight a bit
-        shader.setVec3(pluniform + "specular", specular);
-
-        shader.setVec3(pluniform + "position", pointLightPositions[i]);
-
-        shader.setFloat(pluniform + "constant",  1.0f);
-        shader.setFloat(pluniform + "linear",    0.09f);
-        shader.setFloat(pluniform + "quadratic", 0.032f);
-    }
 
     // spot light
     shader.setVec3("spotLight.ambient",  0.0, 0.0, 0.0);
@@ -201,6 +172,7 @@ void setupLightingStaticUniforms(Shader& shader, glm::vec3 pointLightPositions[]
     shader.setFloat("spotLight.constant",  1.0f);
     shader.setFloat("spotLight.linear",    0.09f);
     shader.setFloat("spotLight.quadratic", 0.032f);
+    shader.setVec3("viewPos",  camera.position);
     shader.setVec3("spotLight.position",  camera.position);
     shader.setVec3("spotLight.direction", camera.front);
 }
