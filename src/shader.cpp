@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include "glm/gtc/type_ptr.hpp"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -14,8 +14,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     try
     {
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
+        vShaderFile.open(shadersPath + vertexShaderName + ".vert");
+        fShaderFile.open(shadersPath + fragmentShaderName + ".frag");
         std::stringstream vShaderStream, fShaderStream;
         // read file's buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
