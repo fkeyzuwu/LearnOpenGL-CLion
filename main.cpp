@@ -12,6 +12,8 @@
 
 #include "src/camera.h"
 #include "src/shader.h"
+#include "src/fkeyz/texture2d.h"
+#include "src/fkeyz/texture_cubemap.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -261,21 +263,18 @@ int main()
 
     // load textures
     // -------------
-    unsigned int cubeTexture  = loadTexture("../assets/marble.jpg");
-    unsigned int floorTexture = loadTexture("../assets/metal.png");
-    unsigned int grassTexture = loadTexture("../assets/window.png");
-    unsigned int containerTexture = loadTexture("../assets/container2.png");
+    fkeyz::Texture2D cubeTexture("marble.jpg");
 
     std::vector<std::string> faces
     {
-        "../assets/skybox/right.jpg",
-        "../assets/skybox/left.jpg",
-        "../assets/skybox/top.jpg",
-        "../assets/skybox/bottom.jpg",
-        "../assets/skybox/front.jpg",
-        "../assets/skybox/back.jpg"
+        "skybox/right.jpg",
+        "skybox/left.jpg",
+        "skybox/top.jpg",
+        "skybox/bottom.jpg",
+        "skybox/front.jpg",
+        "skybox/back.jpg"
     };
-    unsigned int cubemapTexture = loadCubemap(faces);
+    fkeyz::TextureCubemap cubemapTexture(faces);
 
     std::vector<glm::vec3> vegetation;
     vegetation.push_back(glm::vec3(-1.5f,  0.0f, -0.48f));
@@ -326,8 +325,8 @@ int main()
         shader.setVec3("cameraPos", camera.position);
         // cubes
         glBindVertexArray(cubeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        cubeTexture.setActive();
+        cubeTexture.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
 
@@ -339,8 +338,8 @@ int main()
         skyboxShader.setMat4("projection", projection);
         // skybox cube
         glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        cubemapTexture.setActive();
+        cubemapTexture.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
