@@ -1,14 +1,15 @@
 #include "mesh_instance.h"
 
 #include <initializer_list>
+#include <numeric>
 #include <vector>
 #include <glad/glad.h>
 
 namespace fkeyz
 {
-    MeshInstance::MeshInstance(std::span<float> vertices, int stride, std::initializer_list<int> attribute_sizes)
+    MeshInstance::MeshInstance(std::span<float> vertices, std::initializer_list<int> attribute_sizes)
     {
-        float stride_size = sizeof(float) * stride;
+        GLsizei stride_size = sizeof(float) * std::accumulate(attribute_sizes.begin(), attribute_sizes.end(), 0);
         size_t offset = 0;
 
         glGenVertexArrays(1, &vao);

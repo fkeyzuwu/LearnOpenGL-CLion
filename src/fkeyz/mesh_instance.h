@@ -12,7 +12,7 @@ namespace fkeyz
         unsigned int vao;
         unsigned int vbo;
     public:
-        MeshInstance(std::span<float> vertices, int stride, std::initializer_list<int> attribute_sizes);
+        MeshInstance(std::span<float> vertices, std::initializer_list<int> attribute_sizes);
         void bind();
     };
 }

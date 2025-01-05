@@ -194,8 +194,8 @@ int main()
          1.0f, -1.0f,  1.0f
     };
 
-    fkeyz::MeshInstance cube(cubeVertices, 6, {3,3});
-    fkeyz::MeshInstance skybox(skyboxVertices, 3, {3});
+    fkeyz::MeshInstance cube(cubeVertices, {3,3});
+    fkeyz::MeshInstance skybox(skyboxVertices, {3});
 
     // load textures
     // -------------
