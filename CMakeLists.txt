@@ -4,7 +4,7 @@ project(LearnOpenGL-CLion)
 
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Including GLFW
 add_subdirectory(glfw)
