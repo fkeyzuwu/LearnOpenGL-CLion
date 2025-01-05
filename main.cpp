@@ -1,3 +1,4 @@
+#include <array>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -12,6 +13,7 @@
 
 #include "src/camera.h"
 #include "src/shader.h"
+#include "src/fkeyz/mesh_instance.h"
 #include "src/fkeyz/texture2d.h"
 #include "src/fkeyz/texture_cubemap.h"
 
@@ -103,7 +105,7 @@ int main()
     is correct.
 */
 
-    float cubeVertices[] = {
+    std::array cubeVertices = {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -216,17 +218,7 @@ int main()
          1.0f, -1.0f,  1.0f
     };
 
-    unsigned int cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
+    fkeyz::MeshInstance cube(cubeVertices, 6, {3,3});
     // plane VAO
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
@@ -324,7 +316,7 @@ int main()
         shader.setMat4("projection", projection);
         shader.setVec3("cameraPos", camera.position);
         // cubes
-        glBindVertexArray(cubeVAO);
+        cube.bind();
         cubeTexture.setActive();
         cubeTexture.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -352,9 +344,7 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
     glDeleteVertexArrays(1, &planeVAO);
-    glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &planeVBO);
 
     glfwTerminate();
