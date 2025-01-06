@@ -12,6 +12,7 @@
 #include <stb_image/stb_image.h>
 
 #include "src/camera.h"
+#include "src/Model.h"
 #include "src/shader.h"
 #include "src/fkeyz/mesh_instance.h"
 #include "src/fkeyz/texture2d.h"
@@ -75,9 +76,7 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-
-    // configure global opengl state
-    // -----------------------------
+    stbi_set_flip_vertically_on_load(true);
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
@@ -88,86 +87,9 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    std::array shaders = {
-        Shader("model_loading", "shader1"),
-        Shader("model_loading", "shader2"),
-        Shader("model_loading", "shader3"),
-        Shader("model_loading", "shader4"),
-    };
-
-    for (auto& shader : shaders)
-    {
-        unsigned int uniformBlockIndex = glGetUniformBlockIndex(shader.ID, "Matrices");
-        glUniformBlockBinding(shader.ID, uniformBlockIndex, 0);
-    }
-
-    unsigned int uboMatrices;
-    glGenBuffers(1, &uboMatrices);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    std::array cubeVertices = {
-        // positions
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
-
-    std::array cubePositions = {
-        glm::vec3(0.75f, -0.75f, 0),
-        glm::vec3(-0.75f, -0.75f, 0),
-        glm::vec3(0.75f, 0.75f, 0),
-        glm::vec3(-0.75f, 0.75f, 0),
-    };
-
-    fkeyz::MeshInstance cube(cubeVertices, {3});
+    Shader shader = Shader("model_loading", "shader2");
+    Shader spikeyShader = Shader("spikey", "shader1", "point_geometry");
+    Model nanosuit("../assets/backpack_model/backpack.obj");
 
     // load textures
     // -------------
@@ -199,22 +121,24 @@ int main()
 
         // draw scene as normal
 
-        glm::mat4 view = camera.getViewMatrix();
-        glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 100.0f);
+        glm::mat4 view = camera.getViewMatrix();;
+        glm::mat4 model = glm::mat4(1.0f);
+        shader.use();
+        shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
+        shader.setMat4("model", model);
 
-        cube.bind();
+        // draw model
+        nanosuit.Draw(shader);
 
-        for (int i = 0; i < shaders.size(); ++i)
-        {
-            auto& shader = shaders[i];
-            shader.use();
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        spikeyShader.use();
+
+        spikeyShader.setMat4("projection", projection);
+        spikeyShader.setMat4("view", view);
+        spikeyShader.setMat4("model", model);
+
+        nanosuit.Draw(spikeyShader);
 
         glBindVertexArray(0);
 

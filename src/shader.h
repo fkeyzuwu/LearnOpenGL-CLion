@@ -16,7 +16,7 @@ public:
     unsigned int ID;
     const std::string shadersPath = "../src/shaders/";
     // constructor reads and builds the shader
-    Shader(const char* vertexShaderName, const char* fragmentShaderName);
+    Shader(const char* vertexShaderName, const char* fragmentShaderName, const char* geometryShaderName = "");
     // use/activate the shader
     void use();
     // utility uniform functions
@@ -27,5 +27,6 @@ public:
     void setVec3(const std::string &name, float x, float y, float z);
     void setVec3(const std::string &name, glm::vec3 &vector);
 private:
+    std::string loadShaderCode(std::string shaderName, std::string file_extension);
     void checkCompileErrors(unsigned int shader, std::string type);
 };
