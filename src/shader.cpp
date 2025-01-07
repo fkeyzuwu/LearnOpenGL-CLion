@@ -1,9 +1,15 @@
 #include "Shader.h"
 #include "glm/gtc/type_ptr.hpp"
 
-std::string Shader::loadShaderCode(std::string shaderName, std::string file_extension)
+enum class ShaderType
 {
-    std::string shaderCode;
+    Vertex,
+    Fragment,
+    Geometry
+};
+
+void Shader::loadShaderCode(std::string& shaderCode, std::string shaderName, std::string file_extension)
+{
     std::ifstream shaderFile;
     shaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
     try
@@ -17,14 +23,12 @@ std::string Shader::loadShaderCode(std::string shaderName, std::string file_exte
         // close file handlers
         shaderFile.close();
         // convert stream into string
-        shaderCode   = shaderStream.str();
+        shaderCode = shaderStream.str();
     }
     catch(std::ifstream::failure e)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << shaderName << file_extension << std::endl;
     }
-
-    return shaderCode.c_str();
 }
 
 Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName, const char* geometryShaderName)
@@ -34,7 +38,9 @@ Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName, con
     ID = glCreateProgram();
 
     // vertex shader
-    const char* vShaderCode = loadShaderCode(vertexShaderName, ".vert").c_str();
+    std::string vertexCode;
+    loadShaderCode(vertexCode, vertexShaderName, ".vert");
+    const char* vShaderCode = vertexCode.c_str();
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vShaderCode, NULL);
     glCompileShader(vertexShader);
@@ -42,7 +48,9 @@ Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName, con
     glAttachShader(ID, vertexShader);
 
     // fragment shader
-    const char* fShaderCode = loadShaderCode(fragmentShaderName, ".frag").c_str();
+    std::string fragmentCode;
+    loadShaderCode(fragmentCode, fragmentShaderName, ".frag");
+    const char* fShaderCode = fragmentCode.c_str();
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
     glCompileShader(fragmentShader);
@@ -52,11 +60,13 @@ Shader::Shader(const char* vertexShaderName, const char* fragmentShaderName, con
     unsigned int geometryShader = 0;
     if(!std::string(geometryShaderName).empty())
     {
-        const char* gShaderCode = loadShaderCode(geometryShaderName, ".geom").c_str();
+        std::string geometryCode;
+        loadShaderCode(geometryCode, geometryShaderName, ".geom");
+        const char* gShaderCode = geometryCode.c_str();
         geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(geometryShader, 1, &gShaderCode, NULL);
         glCompileShader(geometryShader);
-        checkCompileErrors(fragmentShader, "GEOMETRY");
+        checkCompileErrors(geometryShader, "GEOMETRY");
         glAttachShader(ID, geometryShader);
     }
 

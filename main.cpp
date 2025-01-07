@@ -88,7 +88,7 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader shader = Shader("model_loading", "shader2");
-    Shader spikeyShader = Shader("spikey", "shader1", "point_geometry");
+    Shader spikeyShader = Shader("spikey", "shader1", "remake_geom");
     Model nanosuit("../assets/backpack_model/backpack.obj");
 
     // load textures
@@ -137,6 +137,7 @@ int main()
         spikeyShader.setMat4("projection", projection);
         spikeyShader.setMat4("view", view);
         spikeyShader.setMat4("model", model);
+        spikeyShader.setFloat("time", static_cast<float>(sin(glfwGetTime())));
 
         nanosuit.Draw(spikeyShader);
 
