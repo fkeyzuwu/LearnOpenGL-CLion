@@ -9,6 +9,13 @@
 
 #include "glm/fwd.hpp"
 
+enum class ShaderType
+{
+    Vertex,
+    Fragment,
+    Geometry
+};
+
 class Shader
 {
 public:
@@ -27,6 +34,6 @@ public:
     void setVec3(const std::string &name, float x, float y, float z);
     void setVec3(const std::string &name, glm::vec3 &vector);
 private:
-    void loadShaderCode(std::string& shaderCode, std::string shaderName, std::string file_extension);
+    unsigned int createShader(const std::string& shaderName, ShaderType shaderType);
     void checkCompileErrors(unsigned int shader, std::string type);
 };

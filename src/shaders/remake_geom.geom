@@ -17,7 +17,7 @@ void GenerateLine(int index)
     gl_Position = projection * gl_in[index].gl_Position;
     EmitVertex();
     vec3 normal = gs_in[index].normal;
-    vec3 nextPoint = normal * sectionLength;
+    vec3 nextPoint = normal * MAGNITUDE;
     gl_Position = projection * (gl_in[index].gl_Position + vec4(nextPoint, 1.0));
     EmitVertex();
     EndPrimitive();
