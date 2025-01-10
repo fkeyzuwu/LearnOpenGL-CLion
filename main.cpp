@@ -88,15 +88,46 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader shader = Shader("model_loading", "shader2");
-    Shader spikeyShader = Shader("spikey", "shader1", "remake_geom");
-    Model nanosuit("../assets/backpack_model/backpack.obj");
 
-    // load textures
-    // -------------
+    std::array quadVertices = {
+        // positions     // colors
+        -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
+         0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
+        -0.05f, -0.05f,  0.0f, 0.0f, 1.0f,
 
-    // shader configuration
-    // --------------------
+        -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
+         0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
+         0.05f,  0.05f,  0.0f, 1.0f, 1.0f
+    };
 
+
+    glm::vec2 translations[100];
+    int index = 0;
+    float offset = 0.1f;
+    for(int y = -10; y < 10; y += 2)
+    {
+        for(int x = -10; x < 10; x += 2)
+        {
+            glm::vec2 translation;
+            translation.x = (float)x / 10.0f + offset;
+            translation.y = (float)y / 10.0f + offset;
+            translations[index++] = translation;
+        }
+    }
+
+    unsigned int instanceVBO;
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 100, &translations[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    fkeyz::MeshInstance quad(quadVertices, {2, 3});
+    quad.bind();
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(2, 1);
     // render loop
     // -----------
     while(!glfwWindowShouldClose(window))
@@ -118,28 +149,10 @@ int main()
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // draw scene as normal
-
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 1.0f, 100.0f);
-        glm::mat4 view = camera.getViewMatrix();;
-        glm::mat4 model = glm::mat4(1.0f);
-        shader.use();
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
-        shader.setMat4("model", model);
-
         // draw model
-        nanosuit.Draw(shader);
-
-        spikeyShader.use();
-
-        spikeyShader.setMat4("projection", projection);
-        spikeyShader.setMat4("view", view);
-        spikeyShader.setMat4("model", model);
-        spikeyShader.setFloat("time", static_cast<float>(sin(glfwGetTime())));
-
-        nanosuit.Draw(spikeyShader);
+        shader.use();
+        quad.bind();
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
 
         glBindVertexArray(0);
 

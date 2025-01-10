@@ -33,6 +33,8 @@ public:
     void setMat4(const std::string &name, const glm::mat4 &matrix) const;
     void setVec3(const std::string &name, float x, float y, float z);
     void setVec3(const std::string &name, glm::vec3 &vector);
+    void setVec2(const std::string &name, glm::vec2 &vector);
+
 private:
     unsigned int createShader(const std::string& shaderName, ShaderType shaderType);
     void checkCompileErrors(unsigned int shader, std::string type);
