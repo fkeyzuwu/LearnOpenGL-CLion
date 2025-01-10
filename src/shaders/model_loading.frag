@@ -1,17 +1,11 @@
 #version 330 core
 out vec4 FragColor;
 
-#version 330 core
-layout (location = 0) in vec3 aPos;
+in vec2 TexCoords;
 
-layout (std140) uniform Matrices
-{
-    mat4 projection;
-    mat4 view;
-};
-uniform mat4 model;
+uniform sampler2D texture_diffuse1;
 
 void main()
 {
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    FragColor = texture(texture_diffuse1, TexCoords);
 }

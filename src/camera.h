@@ -17,7 +17,7 @@ private:
     float yaw = -90.0f;
     float pitch = 0.0f;
 
-    const float speed = 10.f; // adjust accordingly
+    const float speed = 40.f; // adjust accordingly
     const float mouseSensitivity = 0.2f;
     const float zoomSensitivity = 10.0f;
     const float zoomLerpSpeed = 8.0f;
